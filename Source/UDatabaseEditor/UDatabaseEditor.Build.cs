@@ -1,8 +1,8 @@
 using UnrealBuildTool;
 
-public class DatabaseEditor : ModuleRules
+public class UDatabaseEditor : ModuleRules
 {
-	public DatabaseEditor(ReadOnlyTargetRules Target) : base(Target)
+	public UDatabaseEditor(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		
@@ -39,7 +39,7 @@ public class DatabaseEditor : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
-                "Database",
+                "UDatabase",
 				"UnrealEd",
                 "EditorStyle",
 				"ContentBrowser",

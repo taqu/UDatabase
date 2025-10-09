@@ -1,9 +1,9 @@
 using System.IO;
 using UnrealBuildTool;
 
-public class Database : ModuleRules
+public class UDatabase : ModuleRules
 {
-	public Database(ReadOnlyTargetRules Target) : base(Target)
+	public UDatabase(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		CStandard = CStandardVersion.Latest;

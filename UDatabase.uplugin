@@ -2,7 +2,7 @@
 	"FileVersion": 3,
 	"Version": 1,
 	"VersionName": "1.0",
-	"FriendlyName": "Database",
+	"FriendlyName": "UDatabase",
 	"Description": "",
 	"Category": "Other",
 	"CreatedBy": "",
@@ -16,12 +16,12 @@
 	"Installed": false,
 	"Modules": [
 		{
-			"Name": "Database",
+			"Name": "UDatabase",
 			"Type": "Runtime",
 			"LoadingPhase": "PreDefault"
 		},
 		{
-			"Name": "DatabaseEditor",
+			"Name": "UDatabaseEditor",
 			"Type": "Editor",
 			"LoadingPhase": "PreLoadingScreen"
 		}
