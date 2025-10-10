@@ -6,7 +6,7 @@
 #include "DatabaseDataAsset.generated.h"
 
 UCLASS(Blueprintable, BlueprintType)
-class DATABASE_API UDatabaseDataAsset: public UPrimaryDataAsset
+class UDATABASE_API UDatabaseDataAsset: public UPrimaryDataAsset
 {
 public:
     GENERATED_BODY()

@@ -302,11 +302,14 @@ FReply SDatabaseDialog::OnClickBuild(EAppReturnType::Type ButtonID)
 	if(!DataTable){
 		return FReply::Handled();
 	}
-	for(FProperty* Property = DataTable->GetRowStruct()->PropertyLink; Property; Property = Property->PropertyLinkNext)
-    {
-        Property->ExportText_Direct
-        UE_LOG(LogTemp, Warning, TEXT("%s : %s"), *Property->GetName(), *Property->GetClass()->GetName());
+    const TMap<FName, uint8*>& RowMap = DataTable->GetRowMap();
+
+	for(auto&& RowIt = RowMap.CreateConstIterator(); RowIt; ++RowIt) {
+        FName RowName = RowIt.Key();
+        uint8* RowData = RowIt.Value();
+        UE_LOG(LogTemp, Warning, TEXT("%s : %p"), *RowName.ToString(), RowData);
     }
+
 	return FReply::Handled();
 }
 

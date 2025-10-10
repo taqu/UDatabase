@@ -25,5 +25,11 @@
 			"Type": "Editor",
 			"LoadingPhase": "PreLoadingScreen"
 		}
+	],
+	"Plugins": [
+		{
+			"Name": "SQLiteCore",
+			"Enabled": true
+		}
 	]
 }

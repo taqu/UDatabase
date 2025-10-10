@@ -8,7 +8,7 @@ public class UDatabase : ModuleRules
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		CStandard = CStandardVersion.Latest;
         CppStandard = CppStandardVersion.Cpp20;
-
+#if false
 		string ThirdPartyPath = Path.Combine(ModuleDirectory, "ThirdParty");
         PublicIncludePaths.AddRange(
 			new string[] {
@@ -23,16 +23,19 @@ public class UDatabase : ModuleRules
 			);
 
 		string ThirdPartyLibPath = Path.Combine(ThirdPartyPath, "Lib", "x64");
-        PublicAdditionalLibraries.Add(Path.Combine(ThirdPartyLibPath, "libcrypto.lib"));
-        PublicAdditionalLibraries.Add(Path.Combine(ThirdPartyLibPath, "libssl.lib"));
-
-		RuntimeDependencies.Add(Path.Combine(ThirdPartyLibPath, "libcrypto-3-x64.dll"));
-        RuntimeDependencies.Add(Path.Combine(ThirdPartyLibPath, "libssl-3-x64.dll"));
-
+        if (Target.Configuration == UnrealTargetConfiguration.Debug){
+			PublicAdditionalLibraries.Add(Path.Combine(ThirdPartyLibPath, "leveldbd.lib"));
+        }
+		else
+		{
+			PublicAdditionalLibraries.Add(Path.Combine(ThirdPartyLibPath, "leveldb.lib"));
+        }
+#endif
         PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
 				"Core",
+                "SQLiteCore",
             }
 			);
 			

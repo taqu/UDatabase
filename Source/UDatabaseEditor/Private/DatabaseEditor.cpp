@@ -69,7 +69,7 @@ TSharedRef<FExtender> FDatabaseEditorModule::GetContentBrowserContextMenuExtende
 {
 	TSharedRef<FExtender> Extender = MakeShared<FExtender>();
 	for (const FAssetData& AssetData : SelectedAssets) {
-		if (!AssetData.IsRedirector() && AssetData.AssetClassPath.GetAssetName() != NAME_Class && !(AssetData.PackageFlags & PKG_FilterEditorOnly)) {
+        if(AssetData.GetClass()  && !AssetData.IsRedirector() && AssetData.AssetClassPath.GetAssetName() != NAME_Class && !(AssetData.PackageFlags & PKG_FilterEditorOnly)) {
 			if (AssetData.GetClass()->IsChildOf(USkeletalMesh::StaticClass())) {
 				Extender->AddMenuExtension(
 					"GetAssetActions",

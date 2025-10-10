@@ -6,13 +6,13 @@
 
 #include "DatabaseDataAsset.h"
 
-struct DATABASEEDITOR_API FDatabaseDialog
+struct UDATABASEEDITOR_API FDatabaseDialog
 {
     static void Open(const FAssetData& DataAsset);
 };
 
 
-class DATABASEEDITOR_API SDatabaseDialog : public SWindow
+class UDATABASEEDITOR_API SDatabaseDialog : public SWindow
 {
 public:
 	SLATE_BEGIN_ARGS(SDatabaseDialog)
