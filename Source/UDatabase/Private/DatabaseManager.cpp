@@ -1,7 +1,10 @@
 #include "DatabaseManager.h"
 
 #include <Containers/AnsiString.h>
+
+THIRD_PARTY_INCLUDES_START
 #include <sqlite/sqlite3.h>
+THIRD_PARTY_INCLUDES_END
 
 #include "Database.h"
 
@@ -63,7 +66,7 @@ bool FDatabaseTransaction::Commit()
     if(Result_ != SQLITE_OK){
         return false;
     }
-    int32 Result = sqlite3_exec(DB_, "COMMIT;", nullptr, nullptr, nullptr);
+    int32 Result = sqlite3_exec(DB_->DB_, "COMMIT;", nullptr, nullptr, nullptr);
     if(SQLITE_OK != Result) {
         return false;
     }
@@ -78,7 +81,7 @@ bool FDatabaseTransaction::Rollback()
     if(!Begin_){
         return false;
     }
-    int32 Result = sqlite3_exec(DB_, "ROLLBACK;", nullptr, nullptr, nullptr);
+    int32 Result = sqlite3_exec(DB_->DB_, "ROLLBACK;", nullptr, nullptr, nullptr);
     if(SQLITE_OK != Result) {
         return false;
     }
@@ -182,7 +185,7 @@ bool FDatabaseHandle::Upsert(FName TableName, FName Key, uint32 Size, const void
     return Upsert(TCHAR_TO_UTF8(*StrTableName), TCHAR_TO_UTF8(*StrKey), Size, Value);
 }
 
-bool FDatabaseHandle::Upsert(const char* TableName, cconst char* Key, uint32 Size, const void* Value)
+bool FDatabaseHandle::Upsert(const char* TableName, const char* Key, uint32 Size, const void* Value)
 {
     check(nullptr != DB_);
     check(nullptr != TableName);

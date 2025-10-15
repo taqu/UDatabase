@@ -49,14 +49,20 @@ public class UDatabase : ModuleRules
 				"SlateCore",
 			}
 			);
-		
-		
-		DynamicallyLoadedModuleNames.AddRange(
+
+        PublicIncludePathModuleNames.AddRange(
+            new string[] {
+                "SQLiteCore",
+            }
+        );
+
+        DynamicallyLoadedModuleNames.AddRange(
 			new string[]
 			{
 			}
 			);
-        AppendStringToPublicDefinition("SQLITE_HAS_CODEC", "1");
+#if false
+		AppendStringToPublicDefinition("SQLITE_HAS_CODEC", "1");
         AppendStringToPublicDefinition("SQLITE_TEMP_STORE", "2");
         AppendStringToPublicDefinition("SQLITE_EXTRA_INIT", "sqlcipher_extra_init");
         AppendStringToPublicDefinition("SQLITE_EXTRA_SHUTDOWN", "sqlcipher_extra_shutdown");
@@ -81,5 +87,6 @@ public class UDatabase : ModuleRules
         AppendStringToPublicDefinition("HAVE_MALLOC_USABLE_SIZE", "0");
         AppendStringToPublicDefinition("SQLITE_ALLOW_ROWID_IN_VIEW", "0");
         AppendStringToPublicDefinition("SQLITE_DEFAULT_CKPTFULLFSYNC", "1");
+#endif
     }
 }

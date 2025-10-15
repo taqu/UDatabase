@@ -18,12 +18,12 @@
 		{
 			"Name": "UDatabase",
 			"Type": "Runtime",
-			"LoadingPhase": "PreDefault"
+			"LoadingPhase": "Default"
 		},
 		{
 			"Name": "UDatabaseEditor",
 			"Type": "Editor",
-			"LoadingPhase": "PreLoadingScreen"
+			"LoadingPhase": "PostDefault"
 		}
 	],
 	"Plugins": [
