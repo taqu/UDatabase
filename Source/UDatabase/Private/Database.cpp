@@ -36,11 +36,11 @@ void FDatabaseModule::StartupModule()
     if(SQLITE_OK != result) {
         return;
     }
-#if 0
+#if 1
     result = sqlite3_key(db, "testkey", sizeof("testkey")-1);
     if(SQLITE_OK != result){
         printf("faile to set key\n");
-        return 0;
+        return;
     }
 #endif
     result = sqlite3_exec(db, "DROP TABLE IF EXISTS people;", nullptr, nullptr, nullptr);

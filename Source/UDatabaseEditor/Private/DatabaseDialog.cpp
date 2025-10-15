@@ -12,6 +12,8 @@
 #include <EditorStyleSet.h>
 #endif
 
+#include <Serialization/MemoryWriter.h>
+
 #include "DatabaseDataAsset.h"
 
 #define LOCTEXT_NAMESPACE "DatabaseEditor"
@@ -304,6 +306,7 @@ FReply SDatabaseDialog::OnClickBuild(EAppReturnType::Type ButtonID)
 	}
     const TMap<FName, uint8*>& RowMap = DataTable->GetRowMap();
 
+	FMemoryWriter64 MemoryWriter;
 	for(auto&& RowIt = RowMap.CreateConstIterator(); RowIt; ++RowIt) {
         FName RowName = RowIt.Key();
         uint8* RowData = RowIt.Value();
