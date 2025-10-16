@@ -6,6 +6,10 @@
 #include "DatabaseDataAsset.h"
 #include "DataTableEditorModule.h"
 #include "DatabaseDialog.h"
+#include "DatabaseManager.h"
+#include "Database.h"
+
+DEFINE_LOG_CATEGORY(LogUDatabaseEditor)
 
 #define LOCTEXT_NAMESPACE "DatabaseEditor"
 
@@ -145,4 +149,4 @@ void FDatabaseEditorModule::HandleAddDataAssetExtenderToMenu(FMenuBuilder& MenuB
 }
 #undef LOCTEXT_NAMESPACE
 
-IMPLEMENT_MODULE(FDatabaseEditorModule, DatabaseEditor)
+IMPLEMENT_MODULE(FDatabaseEditorModule, UDatabaseEditor)

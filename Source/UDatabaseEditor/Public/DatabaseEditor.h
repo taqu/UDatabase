@@ -3,6 +3,10 @@
 #include "Modules/ModuleManager.h"
 #include <Delegates/IDelegateInstance.h>
 
+DECLARE_LOG_CATEGORY_EXTERN(LogUDatabaseEditor, Log, All);
+
+class UDatabaseManager;
+
 struct FAssetData;
 
 class FDatabaseEditorModule : public IModuleInterface

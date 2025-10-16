@@ -42,10 +42,11 @@ public:
 	int32 ValidateDataAsset() const;
 
 private:
-	void OnStaticMeshNameChanged(const FText& Name, ETextCommit::Type TextCommit);
-	void OnTextureBaseNameChanged(const FText& Name, ETextCommit::Type TextCommit);
+    void OnCheckClearTable(ECheckBoxState NewCheckedState);
 	FReply OnClickBuild(EAppReturnType::Type ButtonID);
-	FReply OnClickUpdateMaterials(EAppReturnType::Type ButtonID);
+	FReply OnClickLoad(EAppReturnType::Type ButtonID);
+    FReply OnClickDrop(EAppReturnType::Type ButtonID);
+    FReply OnClickVaccum(EAppReturnType::Type ButtonID);
 	FReply OnClickClose(EAppReturnType::Type ButtonID);
 	void OnAssetSelected(const FAssetData& AssetData);
 	//bool FindTextureBaseName(FString& Name, TObjectPtr<UDatabaseDataAsset> DataAsset) const;
@@ -55,9 +56,8 @@ private:
 	bool ValidatePackage();
 
 	EAppReturnType::Type Result_ = EAppReturnType::Cancel;
+	bool ClearBeforeUpsert_;
 
-	FText StaticMeshName_;
-	FText TextureBaseName_;
 	TSharedPtr<SEditableText> EditStaticMeshName_;
 	TSharedPtr<SEditableText> EditTextureBaseName_;
 

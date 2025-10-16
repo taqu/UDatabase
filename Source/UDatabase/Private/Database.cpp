@@ -14,7 +14,7 @@ void FDatabaseModule::StartupModule()
     if(DatabaseManager_){
         DatabaseManager_->AddToRoot();
     }
-
+#if 0
     struct Person
     {
         char id_[8];
@@ -112,6 +112,7 @@ void FDatabaseModule::StartupModule()
         sqlite3_finalize(select_stmt);
     }
     sqlite3_close(db);
+#endif
 }
 
 void FDatabaseModule::ShutdownModule()
@@ -124,10 +125,10 @@ void FDatabaseModule::ShutdownModule()
 
 UDatabaseManager* FDatabaseModule::GetManager()
 {
-    FDatabaseModule* DatabaseModule = FModuleManager::Get().GetModulePtr<FDatabaseModule>("Database");
+    FDatabaseModule* DatabaseModule = FModuleManager::Get().GetModulePtr<FDatabaseModule>("UDatabase");
     return DatabaseModule ? DatabaseModule->DatabaseManager_ : nullptr; 
 }
 
 #undef LOCTEXT_NAMESPACE
 	
-IMPLEMENT_MODULE(FDatabaseModule, Database)
+IMPLEMENT_MODULE(FDatabaseModule, UDatabase)

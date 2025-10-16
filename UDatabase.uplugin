@@ -23,7 +23,7 @@
 		{
 			"Name": "UDatabaseEditor",
 			"Type": "Editor",
-			"LoadingPhase": "PostDefault"
+			"LoadingPhase": "PreLoadingScreen"
 		}
 	],
 	"Plugins": [

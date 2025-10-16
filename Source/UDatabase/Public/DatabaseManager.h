@@ -1,39 +1,60 @@
 #pragma once
 #include <CoreMinimal.h>
 #include <SQLiteDatabase.h>
+#include <Containers/AnsiString.h>
 #include "DatabaseManager.generated.h"
 
 struct sqlite3;
+struct sqlite3_stmt;
 
 class FDatabaseHandle;
 
-class FDatabaseTransaction
+class UDATABASE_API FDatabaseStatement
 {
 public:
-    FDatabaseTransaction();
-    FDatabaseTransaction(FDatabaseTransaction&& Other);
-    FDatabaseTransaction& operator=(FDatabaseTransaction&& Other);
+    enum class Result
+    {
+        Done,
+        Row,
+        Error,
+    };
 
-    ~FDatabaseTransaction();
+    FDatabaseStatement();
+    FDatabaseStatement(FDatabaseStatement&& Other);
+    FDatabaseStatement& operator=(FDatabaseStatement&& Other);
+
+    ~FDatabaseStatement();
 
     operator bool() const;
-    bool IsOK() const;
-    bool Commit();
-    bool Rollback();
+    bool Finalize();
+
+    bool Upsert(FName Key, uint32 Size, const void* Value);
+    bool Upsert(const char* Key, uint32 Size, const void* Value);
+
+    bool Select(FName Key, TArray<uint8>& Value);
+    bool Select(const char* Key, TArray<uint8>& Value);
+
+    Result GetOne(FString& Key, TArray<uint8>& Value);
+
+    //bool IsOK() const;
+    //bool Commit();
+    //bool Rollback();
 private:
     friend class FDatabaseHandle;
 
-    FDatabaseTransaction(const FDatabaseTransaction&) = delete;
-    FDatabaseTransaction& operator=(FDatabaseTransaction&) = delete;
+    FDatabaseStatement(const FDatabaseStatement&) = delete;
+    FDatabaseStatement& operator=(FDatabaseStatement&) = delete;
 
-    FDatabaseTransaction(FDatabaseHandle* DB);
+    FDatabaseStatement(FDatabaseHandle* DB, sqlite3_stmt* Stmt, const char* TableName);
 
     FDatabaseHandle* DB_;
+    sqlite3_stmt* Stmt_;
+    FAnsiString TableName_;
     bool Begin_;
     int32 Result_;
 };
 
-class FDatabaseHandle
+class UDATABASE_API FDatabaseHandle
 {
 public:
     FDatabaseHandle();
@@ -44,6 +65,9 @@ public:
 
     operator bool() const;
 
+    bool Exists(FName TableName);
+    bool Exists(const char* TableName);
+
     bool CreateIfNotExists(FName Name);
     bool CreateIfNotExists(const char* Name);
     bool DropTable(FName Name);
@@ -53,10 +77,23 @@ public:
     bool Upsert(FName TableName, FName Key, uint32 Size, const void* Value);
     bool Upsert(const char* TableName, const char* Key, uint32 Size, const void* Value);
 
-    bool Select(const char* TableName, const char* Key, uint32& Size, void* Value);
+    bool Select(FName TableName, FName Key, TArray<uint8>& Value);
+    bool Select(const char* TableName, const char* Key, TArray<uint8>& Value);
+
+    FDatabaseStatement BeginUpsert(FName TableName);
+    FDatabaseStatement BeginUpsert(const char* TableName);
+
+    FDatabaseStatement BeginSelect(FName TableName);
+    FDatabaseStatement BeginSelect(const char* TableName);
+
+    FDatabaseStatement BeginGetAll(FName TableName);
+    FDatabaseStatement BeginGetAll(const char* TableName);
+
+    bool Clear(FName TableName);
+    bool Clear(const char* TableName);
 private:
     friend class UDatabaseManager;
-    friend class FDatabaseTransaction;
+    friend class FDatabaseStatement;
 
     FDatabaseHandle(const FDatabaseHandle&) = delete;
     FDatabaseHandle& operator=(FDatabaseHandle&) = delete;
@@ -73,8 +110,8 @@ class UDATABASE_API UDatabaseManager: public UObject
 public:
     virtual void BeginDestroy() override;
 
-    FDatabaseHandle Open(FName Name, ESQLiteDatabaseOpenMode OpenMode);
-
+    FDatabaseHandle Open(const FName& Path, ESQLiteDatabaseOpenMode OpenMode);
+    void Close(const FName& Path);
 private:
     TMap<FName, struct sqlite3*> Databases_;
 };

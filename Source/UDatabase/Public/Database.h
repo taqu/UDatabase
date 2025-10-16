@@ -6,7 +6,7 @@ DECLARE_LOG_CATEGORY_EXTERN(LogUDatabase, Log, All);
 
 class UDatabaseManager;
 
-class FDatabaseModule : public IModuleInterface
+class UDATABASE_API FDatabaseModule: public IModuleInterface
 {
 public:
 
