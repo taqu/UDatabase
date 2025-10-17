@@ -1,7 +1,7 @@
 #include "DatabaseManager.h"
 
-#include <Containers/AnsiString.h>
-
+#include "Misc/Paths.h"
+#include "Misc/PackageName.h"
 THIRD_PARTY_INCLUDES_START
 #include <sqlite/sqlite3.h>
 THIRD_PARTY_INCLUDES_END
@@ -159,49 +159,6 @@ FDatabaseStatement::Result FDatabaseStatement::GetOne(FString& Key, TArray<uint8
         return Result::Done;
     }
 }
-
-#if 0
-bool FDatabaseStatement::IsOK() const
-{
-    return Result_ == SQLITE_OK;
-}
-
-bool FDatabaseStatement::Commit()
-{
-    check(nullptr != DB_);
-    check(nullptr != DB_->DB_);
-    check(nullptr != Stmt_);
-
-    if(!Begin_) {
-        return false;
-    }
-    if(Result_ != SQLITE_OK){
-        return false;
-    }
-    int32 Result = sqlite3_exec(DB_->DB_, "COMMIT;", nullptr, nullptr, nullptr);
-    if(SQLITE_OK != Result) {
-        return false;
-    }
-    Begin_ = false;
-    return true;
-}
-
-bool FDatabaseStatement::Rollback()
-{
-    check(nullptr != DB_);
-    check(nullptr != DB_->DB_);
-    check(nullptr != Stmt_);
-    if(!Begin_){
-        return false;
-    }
-    int32 Result = sqlite3_exec(DB_->DB_, "ROLLBACK;", nullptr, nullptr, nullptr);
-    if(SQLITE_OK != Result) {
-        return false;
-    }
-    Begin_ = false;
-    return true;
-}
-#endif
 
 FDatabaseHandle::FDatabaseHandle()
     : DB_(nullptr)
@@ -521,6 +478,8 @@ FDatabaseHandle UDatabaseManager::Open(const FName& Path, ESQLiteDatabaseOpenMod
         }
         return std::move(FDatabaseHandle(nullptr));
     }
+    //auto decrypted = cthash::chacha20_encrypt(key, encrypted);
+    //int32 Result = sqlite3_key(NewDB, &decrypted[0], (int32)decrypted.size());
     Databases_.Add(Path, NewDB);
     return std::move(FDatabaseHandle(NewDB));
 }

@@ -2,6 +2,10 @@
 #include <CoreMinimal.h>
 #include <SQLiteDatabase.h>
 #include <Containers/AnsiString.h>
+THIRD_PARTY_INCLUDES_START
+#include <cthash.h>
+THIRD_PARTY_INCLUDES_END
+
 #include "DatabaseManager.generated.h"
 
 struct sqlite3;
@@ -35,10 +39,6 @@ public:
     bool Select(const char* Key, TArray<uint8>& Value);
 
     Result GetOne(FString& Key, TArray<uint8>& Value);
-
-    //bool IsOK() const;
-    //bool Commit();
-    //bool Rollback();
 private:
     friend class FDatabaseHandle;
 
@@ -113,6 +113,27 @@ public:
     FDatabaseHandle Open(const FName& Path, ESQLiteDatabaseOpenMode OpenMode);
     void Close(const FName& Path);
 private:
+    template<size_t N>
+    static constexpr std::array<uint8_t, 64> to_char_array(const std::array<uint8_t, N>& x)
+    {
+        constexpr uint8_t hex_chars[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+        std::array<uint8_t, N * 2> str;
+        for(size_t i = 0; i < N; ++i) {
+            str[2 * i + 0] = hex_chars[x[i] & 0xFU];
+            str[2 * i + 1] = hex_chars[(x[i] >> 4) & 0xFU];
+        }
+        return str;
+    }
+#if 0
+#ifdef UDATABASE_PASSWORD
+    static constexpr std::array<uint8_t, 32> key = cthash::sha256_string((const uint8_t[])PREPROCESSOR_TO_STRING(UDATABASE_PASSWORD));
+    static constexpr std::array<uint8_t, 32> pass = cthash::blake3_encrypt((const uint8_t[])PREPROCESSOR_TO_STRING(UDATABASE_PASSWORD));
+#else
+    static constexpr std::array<uint8_t, 32> key = cthash::sha256_string((const uint8_t[])"Hello World!");
+    static constexpr std::array<uint8_t, 32> pass = cthash::blake3_encrypt((const uint8_t[]) "Hello World!");
+#endif
+    static constexpr auto encrypted = cthash::chacha20_encrypt(key, to_char_array(pass));
+#endif
     TMap<FName, struct sqlite3*> Databases_;
 };
 
