@@ -183,6 +183,18 @@ void SDatabaseDialog::Construct(const FArguments& Args)
 			+ SUniformGridPanel::Slot(4, 0)
 			[
 				SNew(SButton)
+				.Text(LOCTEXT("Print", "Print Table in DB"))
+				.HAlign(HAlign_Center)
+#if 5 <= ENGINE_MAJOR_VERSION && 1 <= ENGINE_MINOR_VERSION
+				.ContentPadding(FAppStyle::GetMargin("StandardDialog.ContentPadding"))
+#else
+				.ContentPadding(FEditorStyle::GetMargin("StandardDialog.ContentPadding"))
+#endif
+				.OnClicked(this, &SDatabaseDialog::OnClickPrint, EAppReturnType::Ok)
+			]
+			+ SUniformGridPanel::Slot(5, 0)
+			[
+				SNew(SButton)
 				.Text(LOCTEXT("Close", "Close"))
 				.HAlign(HAlign_Center)
 #if 5 <= ENGINE_MAJOR_VERSION && 1 <= ENGINE_MINOR_VERSION
@@ -237,38 +249,6 @@ int32 SDatabaseDialog::ValidateDataAsset() const
 	if(nullptr == DataAsset) {
 		return 1;
 	}
-#if 0
-		// Invalid Offsets or Normals Texture
-		if ((!DataAsset->AutoSize) && (DataAsset->OverrideSize_Vert.GetMax() < 8)) return 4;
-		// Profile has not Anims
-		if ((DataAsset->Anims_Vert.Num() == 0) && (DataAsset->Anims_Bone.Num() == 0)) return 5;
-		
-		
-		USkeleton* Skeleton = NULL;
-		if (DataAsset->Anims_Vert.Num())
-			if (Profile->Anims_Vert[0].SequenceRef != NULL) Skeleton = DataAsset->Anims_Vert[0].SequenceRef->GetSkeleton();
-		if (DataAsset->Anims_Bone.Num())
-			if (DataAsset->Anims_Bone[0].SequenceRef != NULL) Skeleton = DataAsset->Anims_Bone[0].SequenceRef->GetSkeleton();
-
-		{
-			for (int32 i = 0; i < Profile->Anims_Vert.Num(); i++)
-			{
-				// Invalid Sequence Ref
-				if (DataAsset->Anims_Vert[i].SequenceRef == NULL) return 6;
-				
-				if (DataAsset->Anims_Vert[i].SequenceRef->GetSkeleton() != Skeleton)
-				{
-					// Anims have different Skeletons
-					return 7;
-				}
-				if ((DataAsset->Anims_Vert[i].NumFrames < 1))
-				{
-					// Anim has Num Frames less than 1
-					return 8;
-				}
-			}
-		}
-#endif
 	return 0;
 }
 
@@ -279,7 +259,7 @@ void SDatabaseDialog::OnCheckClearTable(ECheckBoxState NewCheckedState)
 
 FReply SDatabaseDialog::OnClickBuild(EAppReturnType::Type ButtonID)
 {
-    UDatabaseManager* DatabaseManager = FDatabaseModule::GetManager();
+    FDatabaseManager* DatabaseManager = FDatabaseModule::GetManager();
     if(nullptr == DatabaseManager) {
         UE_LOG(LogUDatabaseEditor, Warning, TEXT("Cannot get UDatabaseManager."));
         return FReply::Handled();
@@ -311,8 +291,8 @@ FReply SDatabaseDialog::OnClickBuild(EAppReturnType::Type ButtonID)
 
     UDataTable* DataTable = DatabaseDataAsset->DataTable.LoadSynchronous();
     if(!DataTable || !DataTable->RowStruct) {
+		UE_LOG(LogUDatabaseEditor, Warning, TEXT("Cannot load UDataTable."));
         DatabaseManager->Close(DatabaseDataAsset->DatabasePath);
-        UE_LOG(LogUDatabaseEditor, Warning, TEXT("Cannot load UDataTable."));
 		return FReply::Handled();
 	}
     const TMap<FName, uint8*>& RowMap = DataTable->GetRowMap();
@@ -320,6 +300,7 @@ FReply SDatabaseDialog::OnClickBuild(EAppReturnType::Type ButtonID)
         FDatabaseStatement Statement = Database.BeginUpsert(DatabaseDataAsset->TableName);
 		if(!Statement){
             UE_LOG(LogUDatabaseEditor, Warning, TEXT("Cannot begin prepared statement."));
+			DatabaseManager->Close(DatabaseDataAsset->DatabasePath);
 			return FReply::Handled();
 		}
         TArray<uint8> Bytes;
@@ -339,7 +320,7 @@ FReply SDatabaseDialog::OnClickBuild(EAppReturnType::Type ButtonID)
 
 FReply SDatabaseDialog::OnClickLoad(EAppReturnType::Type ButtonID)
 {
-    UDatabaseManager* DatabaseManager = FDatabaseModule::GetManager();
+    FDatabaseManager* DatabaseManager = FDatabaseModule::GetManager();
     if(nullptr == DatabaseManager) {
         UE_LOG(LogUDatabaseEditor, Warning, TEXT("Cannot get UDatabaseManager."));
         return FReply::Handled();
@@ -376,6 +357,7 @@ FReply SDatabaseDialog::OnClickLoad(EAppReturnType::Type ButtonID)
         FDatabaseStatement Statement = Database.BeginGetAll(DatabaseDataAsset->TableName);
         if(!Statement) {
             UE_LOG(LogUDatabaseEditor, Warning, TEXT("Cannot begin prepared statement."));
+			DatabaseManager->Close(DatabaseDataAsset->DatabasePath);
             return FReply::Handled();
         }
         DataTable->EmptyTable();
@@ -396,9 +378,9 @@ FReply SDatabaseDialog::OnClickLoad(EAppReturnType::Type ButtonID)
             if(Bytes.Num() <= 0) {
                 continue;
             }
-			uint8* RowData = (uint8*)FMemory::Malloc(DataTable->RowStruct->GetStructureSize());
-            EmptyUsingStruct.InitializeStruct(RowData);
-            EmptyUsingStruct.CopyScriptStruct(RowData, &Bytes[0]);
+			//uint8* RowData = (uint8*)FMemory::Malloc(DataTable->RowStruct->GetStructureSize());
+            //EmptyUsingStruct.InitializeStruct(RowData);
+            //EmptyUsingStruct.CopyScriptStruct(RowData, &Bytes[0]);
 			DataTable->AddRow(FName(Key), (const FTableRowBase&)Bytes[0]);
         }
         Statement.Finalize();
@@ -410,7 +392,7 @@ FReply SDatabaseDialog::OnClickLoad(EAppReturnType::Type ButtonID)
 
 FReply SDatabaseDialog::OnClickDrop(EAppReturnType::Type ButtonID)
 {
-    UDatabaseManager* DatabaseManager = FDatabaseModule::GetManager();
+    FDatabaseManager* DatabaseManager = FDatabaseModule::GetManager();
     if(nullptr == DatabaseManager) {
         UE_LOG(LogUDatabaseEditor, Warning, TEXT("Cannot get UDatabaseManager."));
         return FReply::Handled();
@@ -439,7 +421,7 @@ FReply SDatabaseDialog::OnClickDrop(EAppReturnType::Type ButtonID)
 
 FReply SDatabaseDialog::OnClickVaccum(EAppReturnType::Type ButtonID)
 {
-    UDatabaseManager* DatabaseManager = FDatabaseModule::GetManager();
+    FDatabaseManager* DatabaseManager = FDatabaseModule::GetManager();
     if(nullptr == DatabaseManager) {
         UE_LOG(LogUDatabaseEditor, Warning, TEXT("Cannot get UDatabaseManager."));
         return FReply::Handled();
@@ -464,6 +446,67 @@ FReply SDatabaseDialog::OnClickVaccum(EAppReturnType::Type ButtonID)
     return FReply::Handled();
 }
 
+FReply SDatabaseDialog::OnClickPrint(EAppReturnType::Type ButtonID)
+{
+    FDatabaseManager* DatabaseManager = FDatabaseModule::GetManager();
+    if(nullptr == DatabaseManager) {
+        UE_LOG(LogUDatabaseEditor, Warning, TEXT("Cannot get UDatabaseManager."));
+        return FReply::Handled();
+    }
+
+    TObjectPtr<UDatabaseDataAsset> DatabaseDataAsset = GetSelectedDataAsset();
+    if(nullptr == DatabaseDataAsset) {
+        UE_LOG(LogUDatabaseEditor, Warning, TEXT("Needs to select UdatabaseDataAsset."));
+        return FReply::Handled();
+    }
+    if(DatabaseDataAsset->DataTable.IsNull() || DatabaseDataAsset->DatabasePath.IsNone() || DatabaseDataAsset->TableName.IsNone()) {
+        UE_LOG(LogUDatabaseEditor, Warning, TEXT("Needs to set UdatabaseDataAsset properties."));
+        return FReply::Handled();
+    }
+    FDatabaseHandle Database = DatabaseManager->Open(DatabaseDataAsset->DatabasePath, ESQLiteDatabaseOpenMode::ReadWriteCreate);
+    if(!Database) {
+        UE_LOG(LogUDatabaseEditor, Warning, TEXT("Cannot open database %s."), *DatabaseDataAsset->DatabasePath.ToString());
+        return FReply::Handled();
+    }
+	UDataTable* DataTable = DatabaseDataAsset->DataTable.LoadSynchronous();
+    if(!DataTable || !DataTable->RowStruct) {
+        DatabaseManager->Close(DatabaseDataAsset->DatabasePath);
+        UE_LOG(LogUDatabaseEditor, Warning, TEXT("Cannot load UDataTable."));
+        return FReply::Handled();
+    }
+    {
+        FDatabaseStatement Statement = Database.BeginGetAll(DatabaseDataAsset->TableName);
+        if(!Statement) {
+			DatabaseManager->Close(DatabaseDataAsset->DatabasePath);
+            UE_LOG(LogUDatabaseEditor, Warning, TEXT("Cannot begin prepared statement."));
+            return FReply::Handled();
+        }
+		FString Key;
+        TArray<uint8> Bytes;
+		for(;;){
+			Key.Empty();
+            Bytes.Reset();
+            FDatabaseStatement::Result Result = Statement.GetOne(Key, Bytes);
+            if(FDatabaseStatement::Result::Error == Result){
+                UE_LOG(LogUDatabaseEditor, Warning, TEXT("Fail to get row."));
+				break;
+			}
+            if(FDatabaseStatement::Result::Done == Result) {
+				break;
+			}
+            if(Bytes.Num() <= 0) {
+                continue;
+            }
+			UStruct* Struct = reinterpret_cast<UStruct*>(&Bytes[0]);
+			FString Name = Struct->GetName();
+			UE_LOG(LogUDatabaseEditor, Log, TEXT("%s"), *Name);
+        }
+        Statement.Finalize();
+    }
+    DatabaseManager->Close(DatabaseDataAsset->DatabasePath);
+    return FReply::Handled();
+}
+
 FReply SDatabaseDialog::OnClickClose(EAppReturnType::Type ButtonID)
 {
 	Result_ = EAppReturnType::Cancel;
@@ -480,64 +523,10 @@ void SDatabaseDialog::OnAssetSelected(const FAssetData& AssetData)
 	if(!AssetData.IsAssetLoaded()) {
 		return;
 	}
-	#if 0
-	UAnimToTextureDataAsset* DataAsset = Cast<UAnimToTextureDataAsset>(AssetData.GetAsset());
-	if(nullptr == DataAsset) {
-		return;
-	}
-	if(DataAsset->StaticMesh.IsValid()) {
-		FString StaticMeshName = DataAsset->StaticMesh.GetAssetName();
-		EditStaticMeshName_->SetText(FText::FromString(StaticMeshName));
-
-	} else if(DataAsset->SkeletalMesh.IsValid()) {
-		FString StaticMeshName = DataAsset->SkeletalMesh.GetAssetName();
-		StaticMeshName = ReplaceTop(StaticMeshName, TEXT("SK_"), TEXT("VA_"));
-		EditStaticMeshName_->SetText(FText::FromString(StaticMeshName));
-	}
-
-	FString TextureBaseName;
-	if(FindTextureBaseName(TextureBaseName, DataAsset)) {
-		EditTextureBaseName_->SetText(FText::FromString(TextureBaseName));
-
-	} else if(DataAsset->SkeletalMesh.IsValid()) {
-		TextureBaseName = DataAsset->SkeletalMesh.GetAssetName();
-		TextureBaseName = ReplaceTop(TextureBaseName, TEXT("SK_"), TEXT("T_"));
-		EditTextureBaseName_->SetText(FText::FromString(TextureBaseName));
-
-	} else if(DataAsset->StaticMesh.IsValid()) {
-		TextureBaseName = DataAsset->StaticMesh.GetAssetName();
-		TextureBaseName = ReplaceTop(TextureBaseName, TEXT("SM_"), TEXT("T_"));
-		TextureBaseName = ReplaceTop(TextureBaseName, TEXT("VA_"), TEXT("T_"));
-		EditTextureBaseName_->SetText(FText::FromString(TextureBaseName));
-	}
-	#endif
 }
 
 bool SDatabaseDialog::ValidatePackage()
 {
-#if 0
-	TObjectPtr<UAnimToTextureDataAsset> DataAsset = GetSelectedDataAsset();
-
-    FText Reason;
-	FString Path = DataAsset->GetPathName();
-
-    if(!FPackageName::IsValidLongPackageName(Path, false, &Reason)
-       || !FName(*AssetName_.ToString()).IsValidObjectName(Reason)) {
-        FMessageDialog::Open(EAppMsgType::Ok, Reason);
-        return false;
-    }
-
-	FString PackagePath = AssetPath_.ToString() + "/" + AssetName_.ToString() + "." + AssetName_.ToString();
-    if(FPackageName::DoesPackageExist(GetFullAssetPath().ToString()) || FindObject<UObject>(nullptr, *PackagePath) != nullptr) {
-        if(nullptr != GetSelectedProfile()) {
-            if(GetSelectedProfile()->StaticMesh == FindObject<UObject>(nullptr, *PackagePath)) {
-                return true;
-            }
-        }
-        FMessageDialog::Open(EAppMsgType::Ok, FText::Format(LOCTEXT("AssetAlreadyExists", "Asset {0} already exists."), GetFullAssetPath()));
-        return false;
-    }
-#endif
 	return true;
 }
 

@@ -2,9 +2,6 @@
 
 #include "Misc/Paths.h"
 #include "Misc/PackageName.h"
-THIRD_PARTY_INCLUDES_START
-#include <sqlite/sqlite3.h>
-THIRD_PARTY_INCLUDES_END
 
 #include "Database.h"
 
@@ -431,14 +428,12 @@ FDatabaseHandle::FDatabaseHandle(struct sqlite3* DB)
 {
 }
 
-UDatabaseManager::UDatabaseManager(const FObjectInitializer& ObjectInitializer)
-    : Super(ObjectInitializer)
+FDatabaseManager::FDatabaseManager()
 {
 }
 
-void UDatabaseManager::BeginDestroy()
+FDatabaseManager::~FDatabaseManager()
 {
-    Super::BeginDestroy();
     for(auto Itr : Databases_){
         if(Itr.Value){
             sqlite3_close(Itr.Value);
@@ -447,7 +442,7 @@ void UDatabaseManager::BeginDestroy()
     Databases_.Empty();
 }
 
-FDatabaseHandle UDatabaseManager::Open(const FName& Path, ESQLiteDatabaseOpenMode OpenMode)
+FDatabaseHandle FDatabaseManager::Open(const FName& Path, ESQLiteDatabaseOpenMode OpenMode)
 {
     struct sqlite3** DB = Databases_.Find(Path);
     if(nullptr != DB) {
@@ -478,13 +473,13 @@ FDatabaseHandle UDatabaseManager::Open(const FName& Path, ESQLiteDatabaseOpenMod
         }
         return std::move(FDatabaseHandle(nullptr));
     }
-    //auto decrypted = cthash::chacha20_encrypt(key, encrypted);
-    //int32 Result = sqlite3_key(NewDB, &decrypted[0], (int32)decrypted.size());
+    auto decrypted = cthash::chacha20_encrypt(key, encrypted);
+    sqlite3_key(NewDB, &decrypted[0], (int32)decrypted.size());
     Databases_.Add(Path, NewDB);
     return std::move(FDatabaseHandle(NewDB));
 }
 
-void UDatabaseManager::Close(const FName& Path)
+void FDatabaseManager::Close(const FName& Path)
 {
     struct sqlite3** DB = Databases_.Find(Path);
     if(nullptr == DB) {

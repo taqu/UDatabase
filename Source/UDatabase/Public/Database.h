@@ -4,7 +4,7 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogUDatabase, Log, All);
 
-class UDatabaseManager;
+class FDatabaseManager;
 
 class UDATABASE_API FDatabaseModule: public IModuleInterface
 {
@@ -14,9 +14,9 @@ public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 
-	static UDatabaseManager* GetManager();
+	static FDatabaseManager* GetManager();
 
 private:
-    TObjectPtr<UDatabaseManager> DatabaseManager_ = nullptr;
+    TObjectPtr<FDatabaseManager> DatabaseManager_ = nullptr;
 };
 

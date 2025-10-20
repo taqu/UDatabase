@@ -47,11 +47,9 @@ private:
 	FReply OnClickLoad(EAppReturnType::Type ButtonID);
     FReply OnClickDrop(EAppReturnType::Type ButtonID);
     FReply OnClickVaccum(EAppReturnType::Type ButtonID);
+	FReply OnClickPrint(EAppReturnType::Type ButtonID);
 	FReply OnClickClose(EAppReturnType::Type ButtonID);
 	void OnAssetSelected(const FAssetData& AssetData);
-	//bool FindTextureBaseName(FString& Name, TObjectPtr<UDatabaseDataAsset> DataAsset) const;
-	//static void GetBaseName(FString& Name, const FString& Src);
-	//static FString ReplaceTop(const FString& Str, const TCHAR* From, const TCHAR* To);
 
 	bool ValidatePackage();
 

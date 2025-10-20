@@ -9,21 +9,20 @@ DEFINE_LOG_CATEGORY(LogUDatabase)
 #define LOCTEXT_NAMESPACE "DatabaseModule"
 void FDatabaseModule::StartupModule()
 {
-    DatabaseManager_ = NewObject<UDatabaseManager>();
-    if(DatabaseManager_) {
-        DatabaseManager_->AddToRoot();
+    if(!DatabaseManager_) {
+        DatabaseManager_ = new FDatabaseManager();
     }
 }
 
 void FDatabaseModule::ShutdownModule()
 {
     if(DatabaseManager_) {
-        DatabaseManager_->RemoveFromRoot();
+        delete DatabaseManager_;
         DatabaseManager_ = nullptr;
     }
 }
 
-UDatabaseManager* FDatabaseModule::GetManager()
+FDatabaseManager* FDatabaseModule::GetManager()
 {
     FDatabaseModule* DatabaseModule = FModuleManager::Get().GetModulePtr<FDatabaseModule>("UDatabase");
     return DatabaseModule ? DatabaseModule->DatabaseManager_ : nullptr;
