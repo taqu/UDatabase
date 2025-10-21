@@ -47,7 +47,7 @@ private:
 	FReply OnClickLoad(EAppReturnType::Type ButtonID);
     FReply OnClickDrop(EAppReturnType::Type ButtonID);
     FReply OnClickVaccum(EAppReturnType::Type ButtonID);
-	FReply OnClickPrint(EAppReturnType::Type ButtonID);
+	//FReply OnClickPrint(EAppReturnType::Type ButtonID);
 	FReply OnClickClose(EAppReturnType::Type ButtonID);
 	void OnAssetSelected(const FAssetData& AssetData);
 

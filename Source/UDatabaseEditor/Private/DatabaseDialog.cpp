@@ -180,6 +180,7 @@ void SDatabaseDialog::Construct(const FArguments& Args)
 #endif
 				.OnClicked(this, &SDatabaseDialog::OnClickVaccum, EAppReturnType::Ok)
 			]
+			#if 0
 			+ SUniformGridPanel::Slot(4, 0)
 			[
 				SNew(SButton)
@@ -192,6 +193,7 @@ void SDatabaseDialog::Construct(const FArguments& Args)
 #endif
 				.OnClicked(this, &SDatabaseDialog::OnClickPrint, EAppReturnType::Ok)
 			]
+			#endif
 			+ SUniformGridPanel::Slot(5, 0)
 			[
 				SNew(SButton)
@@ -378,9 +380,6 @@ FReply SDatabaseDialog::OnClickLoad(EAppReturnType::Type ButtonID)
             if(Bytes.Num() <= 0) {
                 continue;
             }
-			//uint8* RowData = (uint8*)FMemory::Malloc(DataTable->RowStruct->GetStructureSize());
-            //EmptyUsingStruct.InitializeStruct(RowData);
-            //EmptyUsingStruct.CopyScriptStruct(RowData, &Bytes[0]);
 			DataTable->AddRow(FName(Key), (const FTableRowBase&)Bytes[0]);
         }
         Statement.Finalize();
@@ -445,7 +444,7 @@ FReply SDatabaseDialog::OnClickVaccum(EAppReturnType::Type ButtonID)
     DatabaseManager->Close(DatabaseDataAsset->DatabasePath);
     return FReply::Handled();
 }
-
+#if 0
 FReply SDatabaseDialog::OnClickPrint(EAppReturnType::Type ButtonID)
 {
     FDatabaseManager* DatabaseManager = FDatabaseModule::GetManager();
@@ -497,15 +496,26 @@ FReply SDatabaseDialog::OnClickPrint(EAppReturnType::Type ButtonID)
             if(Bytes.Num() <= 0) {
                 continue;
             }
-			UStruct* Struct = reinterpret_cast<UStruct*>(&Bytes[0]);
-			FString Name = Struct->GetName();
-			UE_LOG(LogUDatabaseEditor, Log, TEXT("%s"), *Name);
+            const FTableRowBase& RowData = *(FTableRowBase*)Bytes.GetData();
+            UScriptStruct& EmptyUsingStruct = *DataTable->RowStruct;
+
+	uint8* NewRawRowData = (uint8*)FMemory::Malloc(EmptyUsingStruct.GetStructureSize());
+	
+	EmptyUsingStruct.InitializeStruct(NewRawRowData);
+	EmptyUsingStruct.CopyScriptStruct(NewRawRowData, &RowData);
+
+			UStruct* Struct = reinterpret_cast<UStruct*>(NewRawRowData);
+			UScriptStruct* Object = reinterpret_cast<UScriptStruct*>(NewRawRowData);
+			FString Name = Object->GetName();
+			//UE_LOG(LogUDatabaseEditor, Log, TEXT("%s"), *Name);
+			FMemory::Free(NewRawRowData);
         }
         Statement.Finalize();
     }
     DatabaseManager->Close(DatabaseDataAsset->DatabasePath);
     return FReply::Handled();
 }
+#endif
 
 FReply SDatabaseDialog::OnClickClose(EAppReturnType::Type ButtonID)
 {
